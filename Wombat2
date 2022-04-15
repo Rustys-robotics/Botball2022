@@ -1,0 +1,191 @@
+#include <kipr/botball.h>
+
+int portNumber = 1;
+int motorSpeed1 = 0;
+int motorSpeed2 = 0;
+
+int motorNumber = 1;
+
+int leftMotor = 2;
+int rightMotor = 1;
+
+int firstBox  = 0;
+int secondBox = 0;
+
+int getStopCounter (int pom_position)
+{
+    switch (pom_position) 
+    {
+        case 0: return 12380;      
+        case 1: return 3700;
+        case 2: return 2500;
+        case 3: return 6800; //7000
+        default: return 0;
+    }
+}
+
+void lineFollowWallaby( int pom_position, int start_counter, int intensityFactor)
+{
+
+    int stopCounter = getStopCounter(pom_position);
+    int curCounter =0;
+
+    //printf("i am at while loop start for pom position %d \n", pom_position);
+    //printf("Current start counter in move wallaby %d \n", start_counter);    
+    //printf("Current stop counter in move wallaby %d \n", stopCounter);
+    
+    int lightIntensity=0;
+    
+    if ( intensityFactor == 1 ) lightIntensity = 3500;
+    if ( intensityFactor == 2 ) lightIntensity = 2600;
+    if ( intensityFactor == 3 ) lightIntensity = 1500;
+    if ( intensityFactor == 4 ) lightIntensity = 2600;
+
+    while (digital (0) == 0 )
+    {
+        // printf("i am inside while loop start \n");
+        if (analog (portNumber) > lightIntensity)
+        {
+            motor(1, motorSpeed1);
+            motor(2, motorSpeed2);
+        }
+        else
+        {
+            motor(1, motorSpeed2);
+            motor(2, motorSpeed1);
+        }
+
+
+        curCounter = abs(get_motor_position_counter(motorNumber));
+       // printf("Current counter in move wallaby while loop %d \n", curCounter);
+        if (curCounter > (start_counter + stopCounter) ) 
+        {
+            printf("End stop counter in move wallaby while loop %d \n", curCounter);
+            printf("i am out of while loop  counter\n");
+            break;
+        }                    
+    }
+}
+
+
+void moveWallaby( int leftMotorSpeed, int rightMotorSpeed, int sleepTime)
+{
+    mav(leftMotor,leftMotorSpeed);//forward (980)
+    mav(rightMotor,rightMotorSpeed); 
+    msleep(sleepTime);     
+}
+
+void setSpeedsPortForLineFollow(int port, int leftMotorSpeed, int rightMotorSpeed)
+{
+    portNumber = port;
+    motorSpeed1 = leftMotorSpeed;
+    motorSpeed2 = rightMotorSpeed;
+}
+
+
+// START OF REGULAR PROGRAM!!!!!!!!
+int main()
+{
+    
+    
+    /*---------------------------------------------------Line following Begin...--------------------------------------------------*/
+    int pos = 0;
+    int  curCounter=0;
+    int numCollections=4;
+    int sensorIntensity = 1;
+
+    clear_motor_position_counter(motorNumber);
+    //working line following speeds: 95, 25 (no-38,-143)(285, 75)
+    setSpeedsPortForLineFollow(5,285,75); // move for pos = 0
+
+   // portNumber = 5;   // move for pos = 0
+   // motorSpeed1 = 90;
+   // motorSpeed2 = 20;
+
+    while (pos < numCollections)
+    {
+        if (pos == 1 ) // first back travel
+        {
+            sensorIntensity = 2;            
+            setSpeedsPortForLineFollow(1,-285,-75);
+            
+           // portNumber = 1;
+          //  motorSpeed1 = -25; //-10
+           // motorSpeed2 = -55; //-45
+            
+             moveWallaby(0,800,150);//turn
+
+            printf("i am backing up\n");
+            clear_motor_position_counter(motorNumber);
+            curCounter = 0;
+           // curCounter = abs(get_motor_position_counter(motorNumber));  //Line following
+        }
+       
+      
+        
+        
+        if (pos == 2 ) // going toward the crates
+        {
+            
+            setSpeedsPortForLineFollow(1,-25,-95);
+
+            /*mav(0,-800);//back up(2500)(2000)-------(6800)
+            mav(2,-800);//I altered the speed from -500 to -200
+            msleep(6100);//msleep changed to 6800 with speed of -200*/
+
+            moveWallaby(-400,400,1850); //turn a number of (insert degrees) degrees
+ 
+            moveWallaby(-800,-800,130); //going forward to match up with line connected to crates
+            
+            sensorIntensity = 3;
+
+            printf("i am in crate collection\n");
+            clear_motor_position_counter(motorNumber);
+            curCounter = 0;
+        }
+        
+        if (pos == 3 ) // coming back from crates
+        {
+           setSpeedsPortForLineFollow(1,-285,-75);
+                      
+           enable_servos();
+           ao();
+           set_servo_position(2,1260);//level claw to prepare to get crates
+           msleep(500);
+            
+           set_servo_position(0,1680);//close claw on crates
+           msleep(500);
+
+           set_servo_position(2,1523);//lift claw/crates
+           msleep(500);
+    
+           moveWallaby(1050,1000,2500);//back up/out
+           ao();
+
+           moveWallaby(500,-500,1600);//turn 90ish  *switch*
+            
+           ao();
+            
+           //msleep(33000);
+            
+           sensorIntensity = 4; 
+            
+            printf("i am line following to camera zone\n");
+            clear_motor_position_counter(motorNumber);
+            curCounter = 0;
+        }
+
+     
+
+        lineFollowWallaby(pos, curCounter,sensorIntensity);
+        pos++;
+        curCounter = abs(get_motor_position_counter(motorNumber));       
+        printf("i am in pom move pos %d and counter value is %d \n", pos,curCounter);
+        
+        clear_motor_position_counter(motorNumber);
+        curCounter=0;
+    }
+    
+    
+
+
