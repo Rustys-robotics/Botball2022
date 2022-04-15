@@ -1,0 +1,104 @@
+#include <kipr/botball.h>
+void lineFollow (double lightIntensity, double leftpower, double rightpower, double distance, int portNumber)
+{
+    int p = 0;
+    set_create_distance(0);
+    msleep(100);
+
+    while (get_create_distance() >= distance) 
+    {
+        if (analog(portNumber) < lightIntensity)
+        {
+            printf("It's dark in here!\n");
+            printf("Create sensor is %d", analog(portNumber));
+            create_drive_direct(leftpower, rightpower); 
+            p = get_create_distance();
+            printf("Create distance is %d\n", p);
+        }
+        else
+        {
+            printf("I see the light!\n");
+            create_drive_direct(rightpower, leftpower);
+            p = get_create_distance();
+            printf("Create distance is %d\n", p);
+
+        }}
+			printf("done");
+}
+
+   void moveCreate2(double leftpower, double rightpower, double distance)
+{
+    int p =0;
+    set_create_distance(0);
+
+    printf("move distance %f\n", distance);
+
+    if ( distance == 76.2 ) 
+    {
+        printf(" I am starting of 76.2 distance move %f \n", distance);
+    }
+
+    while (get_create_distance() <= (int) distance) 
+    {
+        printf("Create distance is %d\n", get_create_distance());
+        create_drive_direct(leftpower, rightpower); 
+    }
+
+    p = get_create_distance();
+    printf("Create stop distance is %d\n", p);
+
+    create_stop();
+    msleep(10);
+}
+
+void reverseCreate(double leftpower, double rightpower, double distance)
+{
+    int p =0;
+    set_create_distance((int) distance);
+    printf("set Create distance is %d\n", (int)get_create_distance());
+
+    while (get_create_distance() >= 0) 
+    {
+        printf("Create distance is %d\n", get_create_distance());
+        create_drive_direct(leftpower, rightpower); 
+    }
+
+    p = get_create_distance();
+    printf("Create stop distance is %d\n", p);
+
+    create_stop(); 
+}
+
+
+
+void turnCreate(double leftpower, double rightpower, double angle)
+{
+    int  p = 0;
+
+    set_create_total_angle(0);
+
+    printf("Create set angle is %d\n", get_create_total_angle());
+
+    while (abs(get_create_total_angle()) < (int) angle) 
+    {
+        printf("Create angle is %d\n", abs(get_create_total_angle()));
+        create_drive_direct(leftpower, rightpower); 
+    }
+
+    p = get_create_total_angle();
+
+    printf("Create stop angle is %d\n", p);
+
+    create_stop();   
+}
+
+int main()
+{
+    printf("Hello World\n");
+
+    lineFollow(3500, -1089, -495, -787.4, 1);//line follow to tram (675) (990 and 450) (635)
+   
+    return 0;
+}
+
+
