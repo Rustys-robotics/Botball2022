@@ -26,7 +26,92 @@ void lineFollow (double lightIntensity, double leftpower, double rightpower, dou
 			printf("done");
 }
 
-   void moveCreate2(double leftpower, double rightpower, double distance)
+void grabFrisbee ()
+{
+    enable_servos();
+
+    set_servo_position(1,1000);//open claw to prepare to grab frisbees (120)
+    msleep(100);
+
+    mav(1,200);//move claw up towards frisbees 
+    msleep(1290);//990
+
+    set_servo_position(2,674);//relevel out claw
+    msleep(100);
+
+    set_servo_position(1, 250);//close claw tighter around frisbees while going up (200)
+    msleep(100);
+
+    mav(1,200);//move claw all the way up to bin
+    msleep(700);//1000
+
+    enable_servos();
+    set_servo_position(1,225);
+    msleep(100);
+
+    int  final_position = 1300;//1504, 1300, 1000
+    int x = 674;
+
+    set_servo_position(2, x);
+    msleep(600);
+
+    while(get_servo_position(2) < final_position)
+    {
+        printf("current servo position %d \n", get_servo_position(2));
+        set_servo_position(2,x);
+        msleep(5);
+        x = x + 10; 
+        printf("Inside while loop %d \n", x);
+    } 
+
+    printf("outside while loop %d \n", x);
+    msleep(100);
+
+    mav(1, 200);//move claw all the way up to bin
+    msleep(1300);//1425
+
+    ao();
+
+    final_position = 362;
+    x = 1300;
+
+    set_servo_position(2, x);
+    msleep(100);
+
+    while(get_servo_position(2) > final_position)
+    {
+        printf("current servo position %d \n", get_servo_position(2));
+        set_servo_position(2,x);
+        msleep(5);
+        x = x - 10; 
+        printf("Inside while loop %d \n", x);
+        if (x < 0) break;
+    }
+
+    printf("outside while loop %d \n", x);
+    msleep(100);
+
+    final_position = 1107;
+    x = 0;
+
+    set_servo_position(1, x);
+    msleep(100);
+
+    while(get_servo_position(1) < final_position)
+    {
+        printf("current servo position %d \n", get_servo_position(1));
+        set_servo_position(1,x);
+        msleep(5);
+        x = x + 10; 
+        printf("Inside while loop %d \n", x);
+    } 
+
+    printf("outside while loop %d \n", x);
+    msleep(100);
+    ao();
+}
+
+void moveCreate2(double leftpower, double rightpower, double distance)
 {
     int p =0;
     set_create_distance(0);
@@ -69,7 +154,166 @@ void reverseCreate(double leftpower, double rightpower, double distance)
     create_stop(); 
 }
 
+void dumpInTram( )
+{
+    mav(1,-400); //move the claw down
+    msleep(2160);//1350 at 400
 
+    ao();
+
+    mav(0, 900);//move igus chain to dump all the poms and frisbees in tram (600)
+    mav(2,770);//let fishing line go(530) Fishingline: 525
+    msleep(5000);//7500
+
+    mav(0,900);//600
+    mav(2,0);//let fishing line stop
+    msleep(667);//(1000)
+
+    ao();
+
+    printf("I am before pull bin down\n");
+    mav(2,-900);//pull bin down(600)
+    msleep(2667);//4000, 2667
+
+    printf("I am after pull bin down\n");
+    mav(2,900);//release fishing line(600)
+    msleep(1200);//1800
+
+    ao();
+
+    create_connect();
+
+    moveCreate2(350, 350, 76.2);//back up so claw doesn't hit tram
+
+    create_disconnect();
+
+
+    mav(0, -900);//move igus chain to dump all the poms and frisbees in tram(900)
+    mav(2,-770);//real fishing line go(220) Fishingline: , 525, 795
+    msleep(5333);//8000
+
+    mav(0,-900);//900
+    msleep(667);//1000
+    ao();
+
+}
+
+void getPoms ()
+{
+    enable_servos();
+
+     set_servo_position(2,196); //level out the claw with the ground //415, 140
+    msleep(100);
+
+    mav(1,400);//move claw so it doesn't get stuck
+    msleep(50);
+
+    ao();
+
+    set_servo_position(2,196); //level out the claw with the ground //415, 140
+    msleep(100);
+
+    set_servo_position(3,1303); //set push tram claw down
+    msleep(100);
+
+    int final_position = 0;
+    int x = 1093;
+
+    set_servo_position(1, x);
+    msleep(100);
+
+    while(get_servo_position(1) > final_position)
+    {
+        printf("current servo position %d \n", get_servo_position(1));
+        set_servo_position(1,x);
+        msleep(5);
+        x = x - 5; 
+        printf("Inside while loop %d \n", x);
+        if (x < 0) break;
+    }
+
+    printf("outside while loop %d \n", x);
+    msleep(100);
+
+    set_servo_position(2,152); //set claw to be level
+    msleep(100);
+
+    mav(1, 400);//claw goes up with poms in it
+    msleep(750);
+
+    enable_servos();
+
+    final_position = 1109;
+    x = 152;
+
+    set_servo_position(2, x);
+    msleep(100);
+
+    while(get_servo_position(2) < final_position)
+    {
+        printf("current servo position %d \n", get_servo_position(2));
+        set_servo_position(2,x);
+        msleep(5);
+        x = x + 20; 
+        printf("Inside while loop %d \n", x);
+    } 
+
+    printf("outside while loop %d \n", x);
+    msleep(100);
+
+    mav(1, 400);//claw goes fully up to the top near bin
+    msleep(900);//1500
+
+    ao();
+
+    final_position = 207;
+    x = 1109;
+
+    set_servo_position(2, x);
+    msleep(100);
+
+    while(get_servo_position(2) > final_position)
+    {
+        printf("current servo position %d \n", get_servo_position(2));
+        set_servo_position(2,x);
+        msleep(5);
+        x = x - 10; 
+        printf("Inside while loop %d \n", x);
+        if (x < 0) break;
+    }
+
+    printf("outside while loop %d \n", x);
+    msleep(100);
+
+    ao();
+
+    set_servo_position(2,362);//turn claw to dump poms in bin
+    msleep(100);
+
+    final_position = 1107;
+    x = 0;
+
+    set_servo_position(1, x);
+    msleep(100);
+
+    while(get_servo_position(1) < final_position)
+    {
+        printf("current servo position %d \n", get_servo_position(1));
+        set_servo_position(1,x);
+        msleep(5);
+        x = x + 10; 
+        printf("Inside while loop %d \n", x);
+    } 
+
+    printf("outside while loop %d \n", x);
+    msleep(1000);
+}
+
+void moveCreate(double leftpower, double rightpower, double stopTime)
+{
+    create_drive_direct(leftpower, rightpower);
+    msleep(stopTime);
+}
 
 void turnCreate(double leftpower, double rightpower, double angle)
 {
@@ -96,8 +340,276 @@ int main()
 {
     printf("Hello World\n");
 
+    wait_for_light(0);
+    shut_down_in(118);
+
+    mav(2, 1000); //make bin go up
+    msleep(4350);//4457
+
+    ao();
+
+    enable_servos();
+
+    set_servo_position(3,1303); //set push tram claw down
+    msleep(100);
+
+    set_servo_position(1, 1093);//keep claw open 
+    msleep(100);
+
+    set_servo_position(2,0);//keeps claw from dragging when moved
+    msleep(100);
+
+    create_connect();
+    create_full();
+
+    reverseCreate(-200, -200, 155);//straighten out against the back near cog railway (190.5)
+
+    create_stop();
+    create_disconnect();
+
+    ao();
+
+    create_connect();
+    moveCreate2(200, 200, 125); // move forward to collect first pom stack  120.5  (125)
+
+    moveCreate(200,-200,160); //turn to alighn with poms(190)
+
+    //----------grab 1st pom stack(whole section)---------------------------------------------------------------
+
+    create_disconnect();
+    getPoms();
+    create_connect();
+
+    //-----------------end of grabbing the first pom stack-----------------------------------------------
+
+
+    moveCreate(-200,200,200); //turn back to alighn with pvc
+
+    reverseCreate(-350, -350, 203.2);//realign in the starting box to be straight
+
+    moveCreate2(200, 200, 370);//move forward towards frisbee and date poms
+
+  //  turnCreate(-200, 200, 1); //so it doesn't get stuck on the pvc
+    
+    create_disconnect();
+
+    mav(1, -250);//put claw down before reaching frisbee
+    msleep(2400);//1500 at 400 speed
+
+    ao();
+
+    set_servo_position(2,0);//keeps claw from dragging when moved
+    msleep(100);
+
+    create_connect();
+
+    moveCreate2(200, 200, 209.55);//move forward towards frisbee (196.85)
+
+    //turnCreate(200, -200, 1); //turn to alighn with frisbee
+    create_disconnect();
+
+    //------------------grab frisbee -----------------------------------------------------------------------
+
+    grabFrisbee();
+
+    //---------------------end of grabbing frisbee ----------------------------------------------------------
+
+
+    create_connect();
+
+    // turnCreate(-200, 200, 1);//turn to alighn with middle
+
+    reverseCreate(-200,-200, 780);//go backwards towards starting box
+
+    turnCreate(-200, 200, 44);//turn 47 degrees left to face 2nd pom stack --52, 49, 47
+
+    create_disconnect();
+
+    set_servo_position(1,941);//open up claw to not hit pom stack
+    msleep(100);
+
+    mav(1,-250);//lower claw to prepare to grab 2nd pom stack
+    msleep(4200);//2100 at 500
+
+    set_servo_position(2,0);//keeps claw from dragging when moved
+    msleep(100);
+
+    ao();
+
+    create_connect();
+
+    moveCreate2(200, 200, 155.575);//move forward towards 2nd pom stack (155.575)
+
+
+    //--------------grab 2nd pom stack(whole section)---------------------------------------------------
+
+    create_stop();
+    create_disconnect();
+    getPoms();
+
+    //---------------end of grabbing 2nd pom stack---------------------------------------------------------
+    create_connect();
+
+    reverseCreate(-200, -200, 38.1);//move back so you don't hit poms
+
+    create_disconnect();
+
+    mav(1, -250);//put claw down to prepare to get poms
+    msleep(4600);
+
+    ao();
+
+    create_connect();
+
+    moveCreate2(200, 200, 12.7);//move towards rest of the poms
+
+    create_disconnect();
+
+    enable_servos();
+
+    set_servo_position(1, 1093);//keep claw open 
+    msleep(100);
+
+    set_servo_position(2,0);//keeps claw from dragging when moved
+    msleep(100);
+
+    set_servo_position(2,196); //level out the claw with the ground //415, 140
+    msleep(100);
+    create_connect();
+
+    moveCreate2(200, 200, 101.6); //move forward towards rest of the poms (114.3)
+
+    //--------------------grab rest of the poms-----------------------------------------------------------------------
+
+    create_disconnect();
+    getPoms();
+
+    enable_servos();
+    set_servo_position(3, 1700);//set claw down
+    msleep(100);
+    
+    //---------------------end grabbing rest of the poms--------------------------------------------------
+
+    create_connect();
+
+    reverseCreate(-200, -200, 38.1);//move back so you don't hit poms
+
+    create_stop();
+
+    mav(1, -250);//put claw down to prepare to get poms
+    msleep(4600);
+
+    ao();
+
+    create_stop();
+
+    moveCreate2(200, 200, 12.7);//move towards rest of the poms
+
+    create_stop();
+
+    enable_servos();
+
+    set_servo_position(1, 1093);//keep claw open 
+    msleep(100);
+
+    set_servo_position(2,0);//keeps claw from dragging when moved
+    msleep(100);
+
+    set_servo_position(2,196); //level out the claw with the ground //415, 140
+    msleep(100);
+    
+    create_stop();
+
+    moveCreate2(200, 200, 101.6); //move forward towards rest of the poms (114.3)
+
+    //--------------------grab rest of the poms-----------------------------------------------------------------------
+
+    create_stop();
+    getPoms();
+
+    enable_servos();
+    set_servo_position(3, 1700);//set claw down
+    msleep(100);
+    
+    //---------------------end grabbing rest of the poms--------------------------------------------------
+
+    create_stop();
+
+    moveCreate2(300, 300, 93.9); //move forward to prepare to alighn with middle line (165.1, 88.9)
+
+   turnCreate(200, -200, 116);//turn to alighn with middle line(120, 126)
+
     lineFollow(3500, -1089, -495, -787.4, 1);//line follow to tram (675) (990 and 450) (635)
+    
+    turnCreate(-200, 200, 85);//turn to face tram
+
+    reverseCreate(-200, -200, 50.8);//back up to prepare to dump (101.6)
    
+
+
+    //---------------------------dump poms and frisbees in tram---------------------------------------------------------
+
+    create_disconnect();
+    dumpInTram();
+
+
+    mav(2, -525);//move bin down so it doesn't hit tram   
+    msleep(3000);//7700 in 341 speed
+
+    ao();  
+
+
+    //--------------------------end of dumping poms and frisbees in tram-----------------------------------------------
+    create_connect();
+
+    reverseCreate(-200, -200, 304.8); //move back towards the tram and prepare to push
+
+   // turnCreate(200, -200, 2);//turn to align with tram
+    create_disconnect();
+
+    //--------------------------move tram claw up and push----------------------------------------------
+
+    enable_servos();
+
+    int final_position = 286;//429
+    int x = 1637;
+
+    while(get_servo_position(3) > final_position)
+    {
+        printf("current servo position %d \n", get_servo_position(3));
+        set_servo_position(3,x);
+        msleep(5);
+        x = x - 5; 
+        printf("Inside while loop %d \n", x);
+        if (x < 0) break;
+    }
+
+    printf("outside while loop %d \n", x);
+    msleep(100);
+
+    set_servo_position(1, 0);//keep claw open 
+    msleep(100);
+
+    set_servo_position(2,0);//keeps claw from dragging when moved
+    msleep(100);
+    
+    create_connect();
+
+    moveCreate2(100, 100, 609.6); //push tram to position 3(558.8)
+
+    create_disconnect();
+
+    enable_servos();
+    
+    set_servo_position(3, 400);//get prepared to hit tram
+    msleep(100);
+    
+     set_servo_position(3, 0);//hit tram
+     msleep(100);
+
+    disable_servos();
+    create_disconnect();
+
     return 0;
 }
 
